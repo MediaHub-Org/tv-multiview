@@ -28,23 +28,23 @@ export function crearBotonesPaises() {
 
         /** @type {Record<string, number>} */
         const CONTEO_NUMERO_CANALES_POR_PAIS = NUMERO_CANALES_CON_PAIS.reduce((conteo, country) => {
-            const countryCode = /** @type {string} */(country);
+            const countryCode = /** @type {string} */ (country);
             const countryName = COUNTRY_CODES[countryCode] ?? 'Desconocido';
             conteo[countryName] = (conteo[countryName] || 0) + 1;
             return conteo;
         }, {});
 
         const PAISES_ORDENADOS = PAISES_SIN_REPETIRSE.filter(
-            (country) => COUNTRY_CODES[/** @type {string} */(country)],
+            (country) => COUNTRY_CODES[/** @type {string} */ (country)],
         ).sort((a, b) => {
-            const codigoA = COUNTRY_CODES[/** @type {string} */(a)]?.toLowerCase() ?? '';
-            const codigoB = COUNTRY_CODES[/** @type {string} */(b)]?.toLowerCase() ?? '';
+            const codigoA = COUNTRY_CODES[/** @type {string} */ (a)]?.toLowerCase() ?? '';
+            const codigoB = COUNTRY_CODES[/** @type {string} */ (b)]?.toLowerCase() ?? '';
             return codigoA.localeCompare(codigoB);
         });
 
         const FRAGMENT_BOTONES_PAISES = document.createDocumentFragment();
         for (const PAIS of PAISES_ORDENADOS) {
-            const paisKey = /** @type {string} */(PAIS);
+            const paisKey = /** @type {string} */ (PAIS);
             if (COUNTRY_CODES[paisKey]) {
                 let namePais = COUNTRY_CODES[paisKey];
                 let cantidadCanales = CONTEO_NUMERO_CANALES_POR_PAIS[namePais] || 0;
@@ -118,7 +118,7 @@ export function crearBotonesPaises() {
                 botonPaisEnDom.addEventListener('click', () => {
                     try {
                         const country = botonPaisEnDom.dataset.country;
-                        const countryKey = /** @type {string} */(country);
+                        const countryKey = /** @type {string} */ (country);
                         let filtro =
                             COUNTRY_CODES[countryKey] ||
                             (countryKey === 'Desconocido'

@@ -29,7 +29,9 @@ export function actualizarBotonesPersonalizarOverlay() {
                 document.body.classList.remove('d-none__barras-overlay');
                 setCheckboxState(
                     /** @type {HTMLInputElement} */ (CHECKBOX_PERSONALIZAR_VISUALIZACION_OVERLAY),
-                    /** @type {HTMLElement} */ (SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_OVERLAY),
+                    /** @type {HTMLElement} */ (
+                        SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_OVERLAY
+                    ),
                     'overlay-display',
                     true,
                 );
@@ -49,7 +51,9 @@ export function actualizarBotonesPersonalizarOverlay() {
                 document.body.classList.add('d-none__barras-overlay');
                 setCheckboxState(
                     /** @type {HTMLInputElement} */ (CHECKBOX_PERSONALIZAR_VISUALIZACION_OVERLAY),
-                    /** @type {HTMLElement} */ (SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_OVERLAY),
+                    /** @type {HTMLElement} */ (
+                        SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_OVERLAY
+                    ),
                     'overlay-display',
                     false,
                 );

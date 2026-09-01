@@ -60,7 +60,7 @@ export function mostrarToast(
     TOAST_DIV.append(TOAST_BOTON_CERRAR);
     TOAST_CONTAINER.append(TOAST_DIV);
 
-    const BS = /** @type {any} */(window).bootstrap;
+    const BS = /** @type {any} */ (window).bootstrap;
     const BOOTSTRAP_TOAST = new BS.Toast(TOAST_DIV, {
         delay: Number(delayValue),
         autohide: autohideValue,

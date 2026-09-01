@@ -80,8 +80,9 @@ export function activarVisionUnica() {
 
         actualizarBotonesPersonalizarOverlay();
 
-        /** @type {HTMLInputElement} */ (INPUT_RANGE_PERSONALIZACION_TAMAÑO_VISION_CUADRICULA).disabled =
-            true;
+        /** @type {HTMLInputElement} */ (
+            INPUT_RANGE_PERSONALIZACION_TAMAÑO_VISION_CUADRICULA
+        ).disabled = true;
         SPAN_VALOR_INPUT_RANGE.textContent = getDisabledLabel();
 
         /** @type {HTMLInputElement} */ (CHECKBOX_PERSONALIZAR_USO_100VH_CANALES).disabled = true;
@@ -171,8 +172,9 @@ export function desactivarVisionUnica() {
 
         actualizarBotonesPersonalizarOverlay();
 
-        /** @type {HTMLInputElement} */ (INPUT_RANGE_PERSONALIZACION_TAMAÑO_VISION_CUADRICULA).disabled =
-            false;
+        /** @type {HTMLInputElement} */ (
+            INPUT_RANGE_PERSONALIZACION_TAMAÑO_VISION_CUADRICULA
+        ).disabled = false;
         actualizarValorSlider();
 
         /** @type {HTMLInputElement} */ (CHECKBOX_PERSONALIZAR_USO_100VH_CANALES).disabled = false;

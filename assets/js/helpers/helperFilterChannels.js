@@ -58,15 +58,16 @@ export function filtrarCanalesPorInput(valorInput, containerBotonesDeCanales) {
                     `#${PREFIJO}-collapse-botones-listado-filtro-countries button`,
                 );
                 botonesFiltroPorPais.forEach((boton) => {
-                    const btn = /** @type {HTMLElement} */(boton);
+                    const btn = /** @type {HTMLElement} */ (boton);
                     if (btn.classList.contains(CSS_CLASS_PRIMARY_BUTTON)) {
                         filtroPorPaisActivo =
-                            COUNTRY_CODES[/** @type {string} */(btn.dataset.country)] ?? btn.dataset.country;
+                            COUNTRY_CODES[/** @type {string} */ (btn.dataset.country)] ??
+                            btn.dataset.country;
                     }
                 });
                 BOTONES_CANALES.forEach((boton) => {
                     if (!boton) return;
-                    const btn = /** @type {HTMLElement} */(boton);
+                    const btn = /** @type {HTMLElement} */ (boton);
                     const contenidoBotonNormalizado = normalizarInput(
                         `${btn.dataset.country} - ${btn.textContent}`,
                     );

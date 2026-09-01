@@ -10,7 +10,7 @@
 export function hideTextoBotonesOverlay() {
     const BARRAS_OVERLAY = document.querySelectorAll('.barra-overlay');
     BARRAS_OVERLAY.forEach((overlay) => {
-        const overl = /** @type {HTMLElement} */(overlay);
+        const overl = /** @type {HTMLElement} */ (overlay);
         if (!overl) return;
         const BOTONES_DENTRO_BARRA_OVERLAY = overl.querySelectorAll('.btn');
         const TEXTO_BOTONES_DENTRO_BARRA_OVERLAY = overl.querySelectorAll(
@@ -19,7 +19,7 @@ export function hideTextoBotonesOverlay() {
 
         // siempre activa texto antes de ocultarlo para tomar tamaño total, no solo del icono
         TEXTO_BOTONES_DENTRO_BARRA_OVERLAY.forEach((span) => {
-            const sp = /** @type {HTMLElement} */(span);
+            const sp = /** @type {HTMLElement} */ (span);
             if (sp && sp.style.display !== 'inline') sp.style.display = 'inline';
         });
 
@@ -34,7 +34,7 @@ export function hideTextoBotonesOverlay() {
 
         const ocultar = botonesWidth >= overlayWidth;
         TEXTO_BOTONES_DENTRO_BARRA_OVERLAY.forEach((span) => {
-            const sp = /** @type {HTMLElement} */(span);
+            const sp = /** @type {HTMLElement} */ (span);
             if (!sp) return;
             if (ocultar && sp.style.display !== 'none') {
                 sp.style.display = 'none';
