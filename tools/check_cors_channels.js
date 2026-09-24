@@ -25,7 +25,7 @@ const http = require('http');
 
 const CHANNELS_FILE = path.join(__dirname, '../json-tv/tv-channels.json');
 const RESULTS_FILE = path.join(__dirname, '../json-tv/cors_results.json');
-const SITE_ORIGIN = 'https://interneto.github.io';
+const SITE_ORIGIN = 'https://mediahub-org.github.io';
 
 const timeoutArg = process.argv.find((arg) => arg.startsWith('--timeout='));
 const onlyArg = process.argv.find((arg) => arg.startsWith('--only='));

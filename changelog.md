@@ -2,7 +2,13 @@
 
 ## [Unreleased]
 
+## [v0.24]
+
+Also covers the v0.23 changes, which were tagged without their own section.
+
 - Fixed
+    - Repository, issue and site links pointed at the old `interneto` repo; they now point to https://github.com/MediaHub-Org/tv-multiview and https://mediahub-org.github.io/tv-multiview/. The CORS check sends the new site's `Origin`.
+    - The service worker ran Workbox 5.1.2 (2020); it now loads 7.3.0, and the script route passes the request explicitly as Workbox 6+ requires.
     - Channel names were rendered with `innerHTML` unescaped and the channel `website` went straight into the overlay link's `href`. The catalogue is partly merged from external lists, so a crafted name or a `javascript:` URL could run script. Names are now escaped, and only absolute http(s) websites are linked (anything else falls back to a search, whose query is now URL-encoded).
     - A healthy player kept its concurrency slot for as long as it played, so with more working channels than slots the last ones never started (the 9-channel default grid left one tile black). The slot is now released once the stream is up: the cap throttles loading, not playback.
     - Channels whose only signal is a platform id (`yt_id`, `twitch_id`…) were treated as having no usable signal and their buttons were hidden, because the check demanded an `http` URL.
@@ -25,12 +31,16 @@
     - JSDoc on every helper.
 
 - Changed
+    - CI actions moved to their Node 24 releases.
+    - The Pages deploy no longer publishes dev tooling (`tools/`, tests, lockfile, lint/format configs).
+    - Dropped the stale `package-lock.json`; pnpm is the package manager.
     - The channel catalog backup moved from localStorage to IndexedDB, with automatic migration and a localStorage fallback.
     - PWA screenshots converted to WebP: 1.90 MB → 244 KB.
     - Default grid: `skynews` and `bbearth` (CORS-blocked), `m6` (plain http, no https twin) replaced by `dw`, `cgtndocumentary` and `tvmonaco`.
 
 - Removed
     - Retired 35 channels that cannot play on the published site (dead links, plain-http with no https twin, or CORS-blocked with no fallback); 117 → 96 active. All of them are kept in `inactive.json`.
+    - The 2026-08-24 maintenance run retired 3 more dead streams (CGTN Russian, Global TV SD, Las Estrellas); 93 active.
 
 ## [v0.22]
 

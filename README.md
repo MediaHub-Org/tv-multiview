@@ -17,19 +17,22 @@ Open-source PWA project for displaying multiple TV streams in a grid or single v
 
 - `index.html` – Main UI and entry point
 - `assets/` – Static resources
-- `js/` – Application logic and helpers
-- `css/` – Stylesheets
-- `img/` – Images and icons
+    - `js/` – Application logic, `helpers/` and `constants/`
+    - `css/` – Stylesheets
+    - `img/`, `favicon/`, `sounds/` – Media
 - `json-tv/` – Channel data
-- `tv-channels.json` – Main channel file
-- `tv-channels.m3u` – M3U playlist
-- `tools/` – Utilities for data manipulation and validation
+    - `tv-channels.json` – Active channel catalogue
+    - `inactive.json` – Retired channels, kept for reference
+- `tools/` – Scripts to check, clean and validate the channel list
+- `test/` – Unit tests (`node --test`)
+
+Live site: https://mediahub-org.github.io/tv-multiview/
 
 ## Quick Start
 
 ### Requirements
 
-- Node.js (for `tools/` scripts)
+- Node.js 22+ and pnpm (for `tools/`, lint and tests)
 - A static server to serve the PWA
 
 ### Installation and Running
@@ -45,6 +48,10 @@ npx http-server -c-1 . -p 8080
 ### Useful Commands
 
 ```bash
+# Checks run in CI
+pnpm install
+pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm test
+
 # Sort IPTV channels by country
 node ./tools/sort_json_by_country.js
 

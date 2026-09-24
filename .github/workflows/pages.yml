@@ -23,7 +23,8 @@ jobs:
         steps:
             - uses: actions/checkout@v7
             - uses: actions/configure-pages@v6
-            - run: rm -rf node_modules test .git
+            # Publish only what the site serves: drop dev tooling, tests and repo metadata.
+            - run: rm -rf node_modules test tools .git .github package.json pnpm-lock.yaml tsconfig.json eslint.config.js .prettierrc .prettierignore .gitattributes .gitignore
             - uses: actions/upload-pages-artifact@v5
               with:
                   path: .

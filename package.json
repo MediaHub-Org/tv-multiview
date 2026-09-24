@@ -1,13 +1,13 @@
 {
     "name": "tv-multiview",
-    "version": "0.23.0",
+    "version": "0.24.0",
     "description": "Open-source PWA to watch and compare multiple live TV streams in a grid.",
     "private": true,
     "license": "See LICENSE",
-    "homepage": "https://interneto.github.io/tv-multiview/",
+    "homepage": "https://mediahub-org.github.io/tv-multiview/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/interneto/tv-multiview"
+        "url": "https://github.com/MediaHub-Org/tv-multiview"
     },
     "scripts": {
         "lint": "eslint .",
