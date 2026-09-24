@@ -1,6 +1,6 @@
 {
     "name": "tv-multiview",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "description": "Open-source PWA to watch and compare multiple live TV streams in a grid.",
     "private": true,
     "license": "See LICENSE",

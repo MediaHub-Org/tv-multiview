@@ -12,16 +12,22 @@
  * servidores ni se molestan en responder cabeceras CORS) y considera utilizable
  * el stream cuyo `access-control-allow-origin` sea `*` o ese mismo origen.
  *
+ * Además sigue la cadena que recorre el player: master playlist → primera variante
+ * → primer segmento. Un canal cuya playlist responde bien pero cuyos segmentos están
+ * caídos, o viven en otro host sin CORS, pasaba el chequeo y nunca mostraba imagen.
+ * `--shallow` vuelve a comprobar solo la playlist principal.
+ *
  * Escribe json-tv/cors_results.json con `{ id: boolean }` y no modifica el
  * catálogo: decide una persona a la vista del informe.
  *
- * Usage: node tools/check_cors_channels.js [--timeout=10000] [--only=id1,id2]
+ * Usage: node tools/check_cors_channels.js [--timeout=10000] [--only=id1,id2] [--shallow]
  */
 
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const { firstPlaylistUri } = require('./lib/hls');
 
 const CHANNELS_FILE = path.join(__dirname, '../json-tv/tv-channels.json');
 const RESULTS_FILE = path.join(__dirname, '../json-tv/cors_results.json');
@@ -31,13 +37,19 @@ const timeoutArg = process.argv.find((arg) => arg.startsWith('--timeout='));
 const onlyArg = process.argv.find((arg) => arg.startsWith('--only='));
 const TIMEOUT = timeoutArg ? parseInt(timeoutArg.split('=')[1], 10) : 10000;
 const ONLY = onlyArg ? new Set(onlyArg.split('=')[1].split(',')) : null;
+const SHALLOW = process.argv.includes('--shallow');
+const MAX_REDIRECTS = 3;
+const MAX_PLAYLIST_BYTES = 256 * 1024;
 
 /**
- * @returns {Promise<{ok: boolean, status: number|null, acao: string|undefined}>}
+ * GET con la cabecera Origin del sitio, siguiendo redirecciones. Lee el cuerpo solo
+ * si `readBody` (playlists); para segmentos basta con las cabeceras.
+ *
+ * @returns {Promise<{ok: boolean, status: number|null, acao: string|undefined, url: string, body: string}>}
  */
-function probeCors(url, timeout) {
+function fetchWithOrigin(url, timeout, readBody, redirects = 0) {
     return new Promise((resolve) => {
-        const lib = url.startsWith('https') ? https : http;
+        const fail = { ok: false, status: null, acao: undefined, url, body: '' };
         let req;
         const done = (result) => {
             try {
@@ -48,19 +60,59 @@ function probeCors(url, timeout) {
             resolve(result);
         };
         try {
+            const lib = url.startsWith('https') ? https : http;
             req = lib.get(url, { timeout, headers: { Origin: SITE_ORIGIN } }, (res) => {
-                const acao = res.headers['access-control-allow-origin'];
                 const status = res.statusCode;
-                const permitido = acao === '*' || acao === SITE_ORIGIN;
-                done({ ok: Boolean(permitido && status >= 200 && status < 400), status, acao });
+                const location = res.headers.location;
+                if (status >= 300 && status < 400 && location && redirects < MAX_REDIRECTS) {
+                    res.resume();
+                    const next = new URL(location, url).href;
+                    fetchWithOrigin(next, timeout, readBody, redirects + 1).then(done);
+                    return;
+                }
+                const acao = res.headers['access-control-allow-origin'];
+                const ok = (acao === '*' || acao === SITE_ORIGIN) && status >= 200 && status < 300;
+                if (!readBody || !ok) {
+                    done({ ok, status, acao, url, body: '' });
+                    return;
+                }
+                let body = '';
+                res.setEncoding('utf8');
+                res.on('data', (chunk) => {
+                    body += chunk;
+                    if (body.length > MAX_PLAYLIST_BYTES) done({ ok, status, acao, url, body });
+                });
+                res.on('end', () => done({ ok, status, acao, url, body }));
+                res.on('error', () => done(fail));
             });
         } catch {
-            done({ ok: false, status: null, acao: undefined });
+            done(fail);
             return;
         }
-        req.on('error', () => done({ ok: false, status: null, acao: undefined }));
-        req.on('timeout', () => done({ ok: false, status: null, acao: undefined }));
+        req.on('error', () => done(fail));
+        req.on('timeout', () => done(fail));
     });
+}
+
+/**
+ * Recorre playlist → variante → segmento como lo haría el player.
+ *
+ * @returns {Promise<{ok: boolean, status: number|null, acao: string|undefined, step: string}>}
+ */
+async function probeStream(url, timeout) {
+    let current = await fetchWithOrigin(url, timeout, !SHALLOW);
+    if (!current.ok || SHALLOW) return { ...current, step: 'playlist' };
+
+    for (let depth = 0; depth < 2; depth++) {
+        const next = firstPlaylistUri(current.body, current.url);
+        if (!next) return { ...current, ok: false, step: 'playlist sin entradas' };
+        const isSegment = next.kind === 'segment';
+        const res = await fetchWithOrigin(next.url, timeout, !isSegment);
+        if (!res.ok) return { ...res, step: isSegment ? 'segmento' : 'variante' };
+        if (isSegment) return { ...res, step: 'segmento' };
+        current = res;
+    }
+    return { ...current, ok: false, step: 'demasiados niveles' };
 }
 
 async function main() {
@@ -73,11 +125,11 @@ async function main() {
         const url = data?.signals?.m3u8_url?.[0];
         if (!url) continue;
 
-        const { ok, status, acao } = await probeCors(url, TIMEOUT);
+        const { ok, status, acao, step } = await probeStream(url, TIMEOUT);
         results[id] = ok;
-        if (!ok) sinCors.push({ id, status, acao: acao ?? '(ninguna)' });
+        if (!ok) sinCors.push({ id, status, acao: acao ?? '(ninguna)', step });
         console.log(
-            `${ok ? '✓' : '✗'} ${id} status=${status ?? 'sin respuesta'} acao=${acao ?? '-'}`,
+            `${ok ? '✓' : '✗'} ${id} [${step}] status=${status ?? 'sin respuesta'} acao=${acao ?? '-'}`,
         );
     }
 
@@ -87,13 +139,17 @@ async function main() {
         `\nUtilizables desde el navegador: ${Object.values(results).filter(Boolean).length}`,
     );
     console.log(`Bloqueados por CORS o sin respuesta: ${sinCors.length}`);
-    for (const { id, status, acao } of sinCors) {
-        console.log(`  - ${id} (status ${status ?? 'sin respuesta'}, acao ${acao})`);
+    for (const { id, status, acao, step } of sinCors) {
+        console.log(`  - ${id} (${step}: status ${status ?? 'sin respuesta'}, acao ${acao})`);
     }
     console.log(`\nResultados en ${RESULTS_FILE}`);
 }
 
-main().catch((err) => {
-    console.error('Error:', err.message || err);
-    process.exit(1);
-});
+if (require.main === module) {
+    main().catch((err) => {
+        console.error('Error:', err.message || err);
+        process.exit(1);
+    });
+}
+
+module.exports = { probeStream, SITE_ORIGIN };

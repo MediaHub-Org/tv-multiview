@@ -11,6 +11,7 @@ export * from './helperInsertDivError.js';
 export * from './helperEscape.js';
 export * from './helperFitGrid.js';
 export * from './helperPlayRejection.js';
+export * from './helperStreamFallback.js';
 export * from './helperChangeButtonsOrder.js';
 export * from './helperDefaultChannels.js';
 export * from './helperCheckboxState.js';

@@ -2,7 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.25]
+
 - Fixed
+    - Twitch signals never played outside the original project's domain: the embed's required `parent` was hardcoded to `alplox.github.io`. It now uses the current host.
+    - A failed m3u8 only fell back to YouTube; channels without a YouTube id but with an embed page or Twitch channel showed an error instead of using them.
+    - The "server refused the stream" message only blamed CORS; a browser cannot tell that apart from a region lock, so the message now names both.
     - The page always had a vertical scrollbar: the grid was sized to `100vh` underneath the top bar, and in 16:9 mode extra rows grew the page further. The page is now exactly the viewport (`100dvh`, following the mobile address bar) and a new fit step sizes tiles so every row is on screen: full-height mode splits the height between rows; 16:9 mode keeps the ratio and narrows/centres the grid.
     - Channels were marked "unavailable" when `play()` was merely interrupted (the off-screen pause from the visibility observer) or autoplay was blocked. Those rejections no longer dispose the player; real stream failures still arrive through the player's `error` event.
     - The single-view "Filter by country" button shared an id with the side panel's filter group, so it toggled the wrong panel.
@@ -10,8 +15,13 @@
     - Every channel overlay repeated the same five element ids; they are classes now.
 
 - Changed
+    - `tools/check_cors_channels.js` now follows the stream like the player does — playlist → first variant → first segment, with the site's `Origin` and redirects — so channels whose playlist answers but whose segments are dead or lack CORS are caught (`--shallow` restores the old playlist-only check). Covered by tests against a local HLS server.
+    - Dependabot opens weekly PRs for GitHub Actions updates and monthly ones for dev dependencies.
     - The top bar is hidden by default; the bottom bar and settings cover everything it did. The language switch moved into Settings, and the top bar can still be turned on there ("Top bar").
     - video.js (was unpinned "latest") and SortableJS (was `@latest`) are pinned to 8.24.1 and 1.15.7, so a new major release cannot silently break playback.
+
+- Removed
+    - `json-tv/tv-channels.m3u` (53 KB, unused since the IPTV mode was removed) and its constant.
 
 ## [v0.24]
 

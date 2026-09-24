@@ -3,4 +3,3 @@
 // - https://iptv-org.github.io/iptv/countries/es.m3u
 
 export const URL_TV_CHANNELS_JSON = './json-tv/tv-channels.json';
-export const URL_IPTV_CHANNELS_M3U = './json-tv/tv-channels.m3u';
