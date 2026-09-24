@@ -8,6 +8,7 @@ import {
 import { CONTAINER_VIDEO_VISION_UNICA, tele } from '../main.js';
 import { mostrarToast, revisarSeñalesVacias, guardarOrdenOriginal } from './index.js';
 import { insertarDivError } from './helperInsertDivError.js';
+import { escapeHtml } from './helperEscape.js';
 import { buildErrorToastMessage, t } from '../i18n.js';
 
 /**
@@ -49,7 +50,7 @@ export function crearBotonesParaCanales() {
                 listChannels[canal].iptv === true
                     ? `<span class="badge text-bg-warning ms-1" title="${t('iptvBadge')}">IPTV</span>`
                     : '';
-            botonCanal.innerHTML = `<span class="flex-grow-1">${name}${insiggniaIptv}</span>
+            botonCanal.innerHTML = `<span class="flex-grow-1">${escapeHtml(name)}${insiggniaIptv}</span>
                     ${country && typeof country === 'string' && COUNTRY_CODES[country.toLowerCase()] ? `<img src="https://flagcdn.com/${country.toLowerCase()}.svg" alt="bandera ${namePais}" title="${namePais}" loading="lazy" decoding="async" class="svg-bandera rounded-1">` : ''}
                     ${iconoCategoria ? `${iconoCategoria}` : ''}`;
             // ${logo ? `<img src="${logo}" alt="logo ${name}" title="logo ${name}" class="img-logos rounded-1">` : ''}

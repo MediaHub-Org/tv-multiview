@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 - Fixed
+    - Channel names were rendered with `innerHTML` unescaped and the channel `website` went straight into the overlay link's `href`. The catalogue is partly merged from external lists, so a crafted name or a `javascript:` URL could run script. Names are now escaped, and only absolute http(s) websites are linked (anything else falls back to a search, whose query is now URL-encoded).
     - A healthy player kept its concurrency slot for as long as it played, so with more working channels than slots the last ones never started (the 9-channel default grid left one tile black). The slot is now released once the stream is up: the cap throttles loading, not playback.
     - Channels whose only signal is a platform id (`yt_id`, `twitch_id`…) were treated as having no usable signal and their buttons were hidden, because the check demanded an `http` URL.
     - Disposing an already-disposed player threw "Invalid target for null#trigger" inside video.js when a stream failed through two paths at once (load timeout and `error`).
@@ -13,6 +14,7 @@
     - Overlay row: buttons without `align-items-center` sat at different heights, the fixed `1.5em` flag width stretched square and vertical flags, and the hardcoded `padding-bottom: 3px` nudge left them off the baseline. Buttons are now centred with a common 24px minimum target and flags keep their own aspect ratio.
 
 - Added
+    - `pnpm run typecheck` (`tsc` over the `checkJs` setup), now also run in CI so the TypeScript migration cannot regress.
     - Weekly `Channel maintenance` workflow: health check → CORS check → YouTube fallbacks → https upgrade → prune, opening a PR with the diff.
     - `tools/check_cors_channels.js`: checks whether a stream is usable _from a browser_. The reachability check runs in Node, which ignores the same-origin policy, so servers that answer 200 without a usable `Access-Control-Allow-Origin` used to pass while never playing a frame.
     - `tools/upgrade_insecure_streams.js`: probes the https twin of every plain-http stream, upgrades it when it answers and retires it when it does not.

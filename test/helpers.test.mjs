@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import { areSimilarNames } from '../assets/js/helpers/helperSimilarNames.js';
 import { M3U_A_JSON } from '../assets/js/helpers/helperM3U.js';
 import { readStoredObject } from '../assets/js/helpers/helperStorage.js';
+import { escapeHtml, safeHttpUrl } from '../assets/js/helpers/helperEscape.js';
 
 // Minimal localStorage stub (Node has no DOM). Only getItem is exercised.
 const store = {};
@@ -88,4 +89,23 @@ test('M3U_A_JSON: skips #EXTVLCOPT lines when finding the stream url', async () 
     const out = await M3U_A_JSON(m3u);
     assert.equal(out.dw.signals.m3u8_url[0], 'https://example.com/dw.m3u8');
     assert.equal(out.dw.country, 'de');
+});
+
+test('escapeHtml: neutralises markup in channel names', () => {
+    assert.equal(
+        escapeHtml(`<img src=x onerror="alert('1')">&`),
+        '&lt;img src=x onerror=&quot;alert(&#39;1&#39;)&quot;&gt;&amp;',
+    );
+    assert.equal(escapeHtml(undefined), '');
+});
+
+test('safeHttpUrl: keeps http(s) links, drops other schemes and junk', () => {
+    assert.equal(safeHttpUrl('https://example.com/live'), 'https://example.com/live');
+    assert.equal(safeHttpUrl('http://example.com'), 'http://example.com/');
+    assert.equal(safeHttpUrl('javascript:alert(1)'), '');
+    assert.equal(safeHttpUrl(' JaVaScRiPt:alert(1)'), '');
+    assert.equal(safeHttpUrl('data:text/html,hi'), '');
+    assert.equal(safeHttpUrl('not a url'), '');
+    assert.equal(safeHttpUrl(''), '');
+    assert.equal(safeHttpUrl(null), '');
 });
