@@ -282,7 +282,12 @@ h5,
 .svg-bandera {
     display: inline-block;
     height: 1em;
-    width: 1.5em;
+    /* la proporción de cada bandera: con un ancho fijo de 1.5em las cuadradas
+       (Suiza) y las verticales (Nepal) salían estiradas */
+    width: auto;
+    /* mismo anclaje que los iconos .bi, que usan -0.125em: bandera y icono
+       comparten caja y quedan a la misma altura que el texto */
+    vertical-align: -0.125em;
 }
 
 .img-logos {
@@ -672,9 +677,20 @@ pwa-update {
         opacity: 1;
     }
 
-    .svg-bandera {
-        padding-bottom: 3px;
-        /* meramente para barra-overlay ya que no quedaba en linea con texto e icono */
+    /* Solo el botón de señal traía `align-items-center`; los otros cuatro iban en
+       stretch, con lo que texto e icono quedaban pegados arriba y a alturas
+       distintas dentro de la fila. La altura fija evita que la caja de la bandera
+       (inline-block sobre la línea de base) haga 1-2px más alta la fila del nombre
+       y desalinee los botones de al lado, y cubre los 24px de WCAG 2.5.8. */
+    .btn {
+        align-items: center;
+        min-height: 1.5rem;
+    }
+
+    /* el gap del propio flex ya separa el caret del icono: el margen de Bootstrap
+       (.255em) descompensaba esa pareja respecto al resto de huecos de la fila */
+    .dropdown-toggle::after {
+        margin-left: 0;
     }
 }
 
@@ -1360,23 +1376,25 @@ html[data-bs-theme='dark'] [data-language-option].btn-outline-secondary {
     --bs-btn-border-color: #adb5bd;
 }
 
-/* MARK: tamaño letra controles video.js
-   La hoja de estilos de video.js deja los controles (botones y tiempos) en
-   9-10px, bajo el 12px que pide WCAG (auditoría font-size). El icono se dibuja
-   a partir del font-size, así que el mínimo debe respetarse en los botones. */
-.vjs-control-bar .vjs-button {
-    font-size: 1.4em !important;
-}
+/* MARK: barra de controles video.js — escala única y alineación
+   video.js mide la barra entera en `em` sobre el font-size del propio elemento
+   (`.video-js` arranca en 10px): la barra mide 3em de alto, cada control 4em de
+   ancho y el glifo se dibuja a 1.8em con `line-height: 1.67`, que deja la caja
+   del icono en 3em — exactamente el alto de la barra. Esa proporción es la que
+   centra los iconos y evita que se corten.
 
-.vjs-control-bar .vjs-time-control {
-    font-size: 1.15em !important;
-}
+   La regla anterior subía el font-size *solo* de los botones (1.4em, y el de los
+   tiempos a 1.15em) para cumplir los 12px que pide WCAG (auditoría font-size), y
+   con eso se rompía la proporción: el glifo pasaba a medir 4.2em dentro de una
+   barra de 3em, así que se salía por abajo y el `overflow: hidden` del
+   reproductor lo cortaba — el caso del icono de subtítulos —; además cada botón
+   crecía de 40px a 56px y los controles de la derecha se salían de la celda.
 
-/* MARK: barra de controles video.js — limpia
-   La barra nativa solo aparece al posar el cursor (o enfocar/interactuar) sobre
-   el canal, nunca en reposo, para no tapar la transmisión. En táctil video.js
-   marca `.vjs-user-active` al tocar, que también la revela. */
+   La base se sube una sola vez, aquí, y todo lo demás (alto, ancho, iconos y
+   textos) escala solo: es lo único que mantiene el dibujo coherente. */
 div[data-canal] .video-js .vjs-control-bar {
+    font-size: 12px; /* mínimo WCAG; de aquí salen los 3em de alto y todos los tamaños */
+    padding: 0 0.25em; /* que ningún control quede pegado al borde de la celda */
     opacity: 0;
     visibility: hidden;
     transition:
@@ -1385,11 +1403,51 @@ div[data-canal] .video-js .vjs-control-bar {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
 }
 
+/* MARK: la barra solo aparece al interactuar
+   Nunca en reposo, para no tapar la transmisión: posar el cursor o enfocarla la
+   revela y en táctil video.js marca `.vjs-user-active` al tocar. */
 div[data-canal] .video-js:hover .vjs-control-bar,
 div[data-canal] .video-js:focus-within .vjs-control-bar,
 div[data-canal] .video-js.vjs-user-active .vjs-control-bar {
     opacity: 1;
     visibility: visible;
+}
+
+/* 3.75em de ancho en vez de 4em: con la base en 12px cada control mide 45px y la
+   fila se pasaba del ancho de las celdas estrechas, empujando subtítulos y
+   pantalla completa fuera del reproductor. El glifo va centrado dentro del
+   botón, así que el ancho solo reparte espacio (45x36px sigue cómodo de tocar) y
+   a la barra de progreso se le adelgaza el mínimo para que absorba el hueco. */
+div[data-canal] .video-js .vjs-button {
+    width: 3.75em;
+    cursor: pointer;
+}
+
+div[data-canal] .video-js .vjs-progress-control {
+    min-width: 3em;
+}
+
+/* Hover y foco: video.js solo enciende el icono con un text-shadow, que sobre
+   vídeo con la barra al 50% de opacidad no se distingue. El foco va con contorno
+   sólido (WCAG 2.4.7), la única pista visible al navegar con teclado. */
+div[data-canal] .video-js .vjs-button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 0.3em;
+}
+
+div[data-canal] .video-js .vjs-button:focus-visible {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.3em;
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+}
+
+/* Los subtítulos comparten la base de la barra: su `bottom: 3em` sale del
+   font-size del reproductor (10px = 30px) y con la barra en 36px el texto caería
+   dentro de ella. Con esta regla tanto el hueco (3em = 36px) como el tamaño del
+   texto (1.4em = 16.8px) siguen a la barra, no al reproductor. */
+div[data-canal] .video-js .vjs-text-track-display {
+    font-size: 12px;
 }
 
 /* MARK: auto-ocultar barra de canales al dejar de interactuar

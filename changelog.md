@@ -9,6 +9,8 @@
     - Both social preview meta tags pointed at `shots_tv-multiview_*.webp` while the files were still named `shots_teles_*.webp`, so link previews had no image. Files renamed, URLs made absolute.
     - The "Reiniciar almacenamiento local" button on the channel-load error screen had no handler and did nothing.
     - Accessibility: the overlay "official page" link lost its accessible name whenever overlay text was hidden, the channel-selector button's `aria-label` did not include its visible text, and the language buttons were below the AA contrast ratio in both themes. Lighthouse accessibility 87 → 95.
+    - The video.js control bar was clipped and misaligned: a blanket `font-size` boost on the buttons broke the em scale video.js uses (icon box 4.2em inside a 3em bar, buttons 40px → 56px), cutting off the subtitles button at the bottom and pushing the right-hand controls out of narrow cells. The bar now sets a single 12px base that everything scales from, with slimmer buttons, hover/focus states and a matching subtitle-track offset.
+    - Overlay row: buttons without `align-items-center` sat at different heights, the fixed `1.5em` flag width stretched square and vertical flags, and the hardcoded `padding-bottom: 3px` nudge left them off the baseline. Buttons are now centred with a common 24px minimum target and flags keep their own aspect ratio.
 
 - Added
     - Weekly `Channel maintenance` workflow: health check → CORS check → YouTube fallbacks → https upgrade → prune, opening a PR with the diff.
