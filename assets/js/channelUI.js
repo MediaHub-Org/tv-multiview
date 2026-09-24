@@ -1,7 +1,7 @@
 // Funciones para crear overlays y fragmentos de canal
 import { listChannels } from './channelsData.js';
 import { LABEL_MODAL_CAMBIAR_CANAL, MODAL_CAMBIAR_CANAL, tele } from './main.js';
-import { COUNTRY_CODES, CATEGORY_ICONS, AUDIO_POP, TWITCH_BASE_URL } from './constants/index.js';
+import { COUNTRY_CODES, CATEGORY_ICONS, AUDIO_POP } from './constants/index.js';
 import {
     mostrarToast,
     playAudioSinDelay,
@@ -14,6 +14,7 @@ import {
 } from './helpers/index.js';
 import { acquirePlayerSlotHandle } from './helpers/helperPlayerSlots.js';
 import { isBenignPlayRejection } from './helpers/helperPlayRejection.js';
+import { pickEmbedFallback } from './helpers/helperStreamFallback.js';
 import { buildErrorToastMessage, t } from './i18n.js';
 
 // Funciones de UI de canales extraídas de main.js
@@ -138,7 +139,9 @@ export function generateStreamIframe(canalId, tipoSeñalParaIframe, valorIndex =
             `https://www.youtube-nocookie.com/embed/videoseries?list=${signals.yt_playlist}&autoplay=0&mute=0&modestbranding=1&showinfo=0`,
         twitch_id:
             signals.twitch_id &&
-            `https://player.twitch.tv/?channel=${signals.twitch_id}&parent=${TWITCH_BASE_URL}`,
+            // Twitch solo reproduce si `parent` es el dominio que embebe el player: un
+            // valor fijo (antes el dominio del proyecto original) lo rompía en cualquier otro.
+            `https://player.twitch.tv/?channel=${signals.twitch_id}&parent=${location.hostname}`,
     };
 
     const IFRAME_ELEMENT = document.createElement('iframe');
@@ -235,16 +238,22 @@ export function createVideoPlayer(canalId, urlCarga) {
         // de YouTube es un iframe, nunca pega contra los mismos bloqueos de CORS/hotlink.
         // Siempre dispone el player: ya no se va a usar, sea cual sea el desenlace.
         /** @param {string} [tipoError] */
-        const fallbackToYoutubeOrShowError = (tipoError) => {
+        const fallbackToEmbedOrShowError = (tipoError) => {
             clearTimeout(loadTimeoutId);
             // Un mismo fallo llega por dos vías (el evento 'error' y el rechazo de
             // play(), o el timeout): disponer dos veces el mismo player lanza
             // "Invalid target for null#trigger" dentro de video.js.
             if (player.isDisposed()) return;
             player.dispose();
-            const ytId = listChannels[canalId]?.signals?.yt_id;
-            if (ytId) {
-                DIV_ELEMENT.replaceWith(generateStreamIframe(canalId, 'yt_id'));
+            // Respaldo embebible (YouTube, página del canal o Twitch): un iframe nunca
+            // choca con los bloqueos de CORS/hotlink que tumban al m3u8.
+            const respaldo = pickEmbedFallback(listChannels[canalId]?.signals);
+            if (respaldo) {
+                const indice =
+                    respaldo === 'iframe_url'
+                        ? listChannels[canalId].signals.iframe_url.findIndex(Boolean)
+                        : 0;
+                DIV_ELEMENT.replaceWith(generateStreamIframe(canalId, respaldo, indice));
                 return;
             }
             const presentacion = STREAM_ERROR_PRESENTATION[tipoError];
@@ -256,7 +265,7 @@ export function createVideoPlayer(canalId, urlCarga) {
         const loadTimeoutId = setTimeout(() => {
             console.warn(`Timeout de carga para canal "${canalId}". Source: ${urlCarga}`);
             slot.release();
-            fallbackToYoutubeOrShowError('network-error');
+            fallbackToEmbedOrShowError('network-error');
         }, STREAM_LOAD_TIMEOUT_MS);
 
         player.on('dispose', () => {
@@ -278,7 +287,7 @@ export function createVideoPlayer(canalId, urlCarga) {
             console.warn(
                 `Video.js error for channel "${canalId}" [${tipoError}]. Source: ${urlCarga}`,
             );
-            fallbackToYoutubeOrShowError(tipoError);
+            fallbackToEmbedOrShowError(tipoError);
         });
 
         player.src({
@@ -292,7 +301,7 @@ export function createVideoPlayer(canalId, urlCarga) {
                 // Un play() interrumpido o sin permiso de autoplay no es un stream caído:
                 // antes se desechaba el player y el canal quedaba como "no disponible".
                 if (isBenignPlayRejection(error)) return;
-                fallbackToYoutubeOrShowError();
+                fallbackToEmbedOrShowError();
             });
         });
     });

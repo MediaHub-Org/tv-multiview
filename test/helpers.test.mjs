@@ -11,6 +11,7 @@ import { readStoredObject } from '../assets/js/helpers/helperStorage.js';
 import { escapeHtml, safeHttpUrl } from '../assets/js/helpers/helperEscape.js';
 import { computeGridFit } from '../assets/js/helpers/helperFitGrid.js';
 import { isBenignPlayRejection } from '../assets/js/helpers/helperPlayRejection.js';
+import { pickEmbedFallback } from '../assets/js/helpers/helperStreamFallback.js';
 
 // Minimal localStorage stub (Node has no DOM). Only getItem is exercised.
 const store = {};
@@ -152,4 +153,18 @@ test('isBenignPlayRejection: interrupted or autoplay-blocked play() is not a dea
     assert.equal(isBenignPlayRejection(new DOMException('bad src', 'NotSupportedError')), false);
     assert.equal(isBenignPlayRejection(new Error('boom')), false);
     assert.equal(isBenignPlayRejection(undefined), false);
+});
+
+test('pickEmbedFallback: YouTube first, then the embed page, then Twitch', () => {
+    assert.equal(
+        pickEmbedFallback({ yt_id: 'UC1', iframe_url: ['https://x'], twitch_id: 't' }),
+        'yt_id',
+    );
+    assert.equal(
+        pickEmbedFallback({ yt_id: '', iframe_url: ['', 'https://x'], twitch_id: 't' }),
+        'iframe_url',
+    );
+    assert.equal(pickEmbedFallback({ yt_id: '', iframe_url: [], twitch_id: 'chan' }), 'twitch_id');
+    assert.equal(pickEmbedFallback({ yt_id: '', iframe_url: [], twitch_id: '' }), null);
+    assert.equal(pickEmbedFallback(undefined), null);
 });

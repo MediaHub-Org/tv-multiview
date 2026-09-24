@@ -58,6 +58,9 @@ node ./tools/sort_json_by_country.js
 # Lightweight validation without dependencies
 node ./tools/validate_json_light.js
 
+# Check streams are playable from the browser (playlist → variant → segment, CORS)
+node ./tools/check_cors_channels.js
+
 # Generate a status report and update the JSON channel list
 node ./tools/report_status_channels.js
 node ./tools/update_list_channels.js

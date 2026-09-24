@@ -165,7 +165,8 @@ const translations = {
         nextSignalFallback: 'Se utilizará la siguiente señal disponible.',
         streamUnavailable: 'Stream no disponible',
         streamErrorMixedContent: 'Bloqueado: la fuente usa http:// en una página https',
-        streamErrorCorsBlocked: 'Bloqueado por la política CORS del servidor de origen',
+        streamErrorCorsBlocked:
+            'El servidor rechazó la conexión (política CORS o restricción por país)',
         streamErrorSegment: 'Falló un fragmento del stream (caída puntual o token vencido)',
         streamErrorTokenExpired: 'Posible token de acceso expirado',
         streamErrorNetwork: 'Servidor no disponible (caído, tiempo agotado o dirección incorrecta)',
@@ -324,7 +325,7 @@ const translations = {
         nextSignalFallback: 'The next available signal will be used.',
         streamUnavailable: 'Stream unavailable',
         streamErrorMixedContent: 'Blocked: source uses http:// on an https page',
-        streamErrorCorsBlocked: "Blocked by the source server's CORS policy",
+        streamErrorCorsBlocked: 'The server refused the stream (CORS policy or region lock)',
         streamErrorSegment: 'A stream segment failed (brief outage or expired token)',
         streamErrorTokenExpired: 'Access token likely expired',
         streamErrorNetwork: 'Server unreachable (down, timed out, or wrong address)',

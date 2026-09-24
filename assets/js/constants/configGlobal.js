@@ -1,5 +1,3 @@
-export const TWITCH_BASE_URL = 'alplox.github.io';
-
 export const CSS_CLASS_PRIMARY_BUTTON = 'btn-indigo';
 export const CSS_CLASS_SECONDARY_BUTTON = 'btn-dark-subtle';
 export const CHANNEL_CONTAINER_ID_PREFIXES = [
