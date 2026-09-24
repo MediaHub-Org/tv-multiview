@@ -1,6 +1,7 @@
 import { CSS_CLASS_PRIMARY_BUTTON } from '../constants/index.js';
 import { mostrarToast, obtenerNumeroCanalesFila } from './index.js';
 import { buildErrorToastMessage, t } from '../i18n.js';
+import { fitGridToViewport } from './helperFitGrid.js';
 
 import {
     BOTONES_PERSONALIZAR_TRANSMISIONES_POR_FILA,
@@ -46,14 +47,9 @@ export function adjustChannelColumnCount() {
         const transmisionesEnGrid = CONTAINER_VISION_CUADRICULA.querySelectorAll('div[data-canal]');
         const lsTransmisionesFila = localStorage.getItem('numero-class-columnas-por-fila');
         const uso100vh = localStorage.getItem('uso-100vh');
-        const claseCienViewHeight = uso100vh === 'activo' ? ['vh-100', 'overflow-hidden'] : [];
-        const containerVision = document.querySelector('#container-vision-cuadricula');
-        if (!containerVision) return;
-        if (uso100vh === 'activo') {
-            containerVision.classList.add('h-100');
-        } else {
-            containerVision.classList.remove('h-100');
-        }
+        // La altura de cada tile la fija fitGridToViewport (variable --tile-h) para que
+        // todas las filas quepan en pantalla; aquí solo se decide el ancho (col-*).
+        const claseCienViewHeight = uso100vh === 'activo' ? ['overflow-hidden'] : [];
         const numCanalesFila = obtenerNumeroCanalesFila();
         if (!lsTransmisionesFila || isNaN(Number(lsTransmisionesFila))) return;
         if (!isMobile.any) {
@@ -110,6 +106,8 @@ export function adjustChannelColumnCount() {
             false,
         );
         return;
+    } finally {
+        fitGridToViewport();
     }
 }
 

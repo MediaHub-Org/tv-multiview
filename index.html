@@ -55,15 +55,15 @@
         <!-- video-js: no bloquea, los players no se instancian hasta que cargan
              los canales -->
         <link
-            href="https://unpkg.com/video.js/dist/video-js.min.css"
+            href="https://unpkg.com/video.js@8.24.1/dist/video-js.min.css"
             rel="stylesheet"
             media="print"
             onload="this.media = 'all'"
         />
         <noscript>
-            <link href="https://unpkg.com/video.js/dist/video-js.min.css" rel="stylesheet" />
+            <link href="https://unpkg.com/video.js@8.24.1/dist/video-js.min.css" rel="stylesheet" />
         </noscript>
-        <script defer src="https://unpkg.com/video.js/dist/video.min.js"></script>
+        <script defer src="https://unpkg.com/video.js@8.24.1/dist/video.min.js"></script>
         <!-- tv-multiview -->
         <!-- Preload main stylesheet to reduce flash of unstyled content -->
         <link
@@ -123,7 +123,7 @@
             document.body.appendChild(el);
         </script>
         <!-- Sortable -->
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
         <!-- pwa-install -->
         <script src="https://unpkg.com/@khmyznikov/pwa-install@0.3.5/dist/pwa-install.bundle.js"></script>
     </head>
@@ -429,13 +429,13 @@
         </div>
 
         <!-- Grid canales -->
-        <main class="vh-100 app-shell" aria-label="Contenido principal de canales">
+        <main class="app-shell" aria-label="Contenido principal de canales">
             <!-- version vision cuadricula -->
             <div class="row g-0 h-100" id="container-vision-cuadricula"></div>
 
             <!-- version vision unica -->
             <div
-                class="vh-100 w-100 position-absolute overflow-hidden d-none"
+                class="h-100 w-100 position-absolute top-0 start-0 overflow-hidden d-none"
                 id="container-vision-unica"
             >
                 <div class="vision-unica-grid bg-dark-subtle h-100">
@@ -472,9 +472,9 @@
                                         class="btn btn-sm btn-dark w-100 rounded-pill"
                                         type="button"
                                         data-bs-toggle="collapse"
-                                        data-bs-target="#offcanvas-collapse-btn-group"
+                                        data-bs-target="#vision-unica-collapse-btn-group"
                                         aria-expanded="false"
-                                        aria-controls="offcanvas-collapse-btn-group"
+                                        aria-controls="vision-unica-collapse-btn-group"
                                     >
                                         <i class="bi bi-funnel"></i> Filtrar por pais
                                     </button>
@@ -483,6 +483,7 @@
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-dark dropdown-toggle rounded-pill"
+                                                data-i18n-sort
                                                 data-bs-toggle="dropdown"
                                                 aria-expanded="false"
                                             >
@@ -542,7 +543,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="collapse py-2" id="offcanvas-collapse-btn-group">
+                                <div class="collapse py-2" id="vision-unica-collapse-btn-group">
                                     <div class="card card-body rounded-4">
                                         <div
                                             class="btn-group btn-group-sm container-btn-group px-1 scrollbar-thin-gray"
@@ -665,6 +666,7 @@
                                     <button
                                         type="button"
                                         class="btn btn-sm btn-dark dropdown-toggle h-100 rounded-pill"
+                                        data-i18n-sort
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
                                     >
@@ -838,6 +840,7 @@
                                         <button
                                             type="button"
                                             class="btn btn-sm btn-dark dropdown-toggle h-100 rounded-pill"
+                                            data-i18n-sort
                                             data-bs-toggle="dropdown"
                                             aria-expanded="false"
                                         >
@@ -1033,6 +1036,7 @@
                                     <button
                                         type="button"
                                         class="btn btn-sm btn-dark dropdown-toggle rounded-pill"
+                                        data-i18n-sort
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
                                     >
@@ -1362,6 +1366,33 @@
                                     <span class="panel-summary-label">Atajo recomendado</span>
                                     <strong>Vision unica</strong>
                                 </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="w-100">
+                        <div
+                            class="py-2 px-3 bg-dark-subtle rounded-pill border border-light-subtle shadow d-flex align-items-center justify-content-between gap-2"
+                        >
+                            <span><i class="bi bi-translate me-1"></i> Idioma / Language</span>
+                            <div
+                                class="btn-group btn-group-sm language-switcher"
+                                role="group"
+                                aria-label="Selector de idioma"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-language-option="es"
+                                >
+                                    ES
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-language-option="en"
+                                >
+                                    EN
+                                </button>
                             </div>
                         </div>
                     </li>

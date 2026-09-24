@@ -325,9 +325,37 @@ h5,
     border: 1px solid var(--app-border);
 }
 
+/* La página nunca hace scroll: body es una columna del alto exacto del viewport
+   (dvh sigue a la barra de direcciones móvil), la barra superior opcional toma lo
+   suyo y .app-shell el resto. fitGridToViewport reparte ese alto entre las filas. */
+html,
+body {
+    height: 100%;
+}
+
+body {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 .app-shell {
     position: relative;
     isolation: isolate;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#container-vision-cuadricula {
+    height: 100%;
+    margin-inline: auto;
+    align-content: center;
+}
+
+#container-vision-cuadricula > div[data-canal] {
+    height: var(--tile-h, auto);
 }
 
 #container-vision-cuadricula,
@@ -698,31 +726,31 @@ pwa-update {
     display: none !important;
 }
 
-#overlay-boton-selecionar-señal,
-#overlay-boton-mover,
-#overlay-boton-cambiar,
-#overlay-boton-pagina-oficial,
-#overlay-boton-quitar {
+.overlay-boton-selecionar-señal,
+.overlay-boton-mover,
+.overlay-boton-cambiar,
+.overlay-boton-pagina-oficial,
+.overlay-boton-quitar {
     display: inline;
 }
 
-.d-none__barras-overlay__overlay-boton-selecionar-señal #overlay-boton-selecionar-señal {
+.d-none__barras-overlay__overlay-boton-selecionar-señal .overlay-boton-selecionar-señal {
     display: none !important;
 }
 
-.d-none__barras-overlay__overlay-boton-mover #overlay-boton-mover {
+.d-none__barras-overlay__overlay-boton-mover .overlay-boton-mover {
     display: none !important;
 }
 
-.d-none__barras-overlay__overlay-boton-cambiar #overlay-boton-cambiar {
+.d-none__barras-overlay__overlay-boton-cambiar .overlay-boton-cambiar {
     display: none !important;
 }
 
-.d-none__barras-overlay__overlay-boton-pagina-oficial #overlay-boton-pagina-oficial {
+.d-none__barras-overlay__overlay-boton-pagina-oficial .overlay-boton-pagina-oficial {
     display: none !important;
 }
 
-.d-none__barras-overlay__overlay-boton-quitar #overlay-boton-quitar {
+.d-none__barras-overlay__overlay-boton-quitar .overlay-boton-quitar {
     display: none !important;
 }
 
@@ -853,7 +881,7 @@ pwa-update {
             order: 1;
         }
 
-        #overlay-boton-mover,
+        .overlay-boton-mover,
         #boton-mover-panel-canales-vision-unica {
             display: none !important;
         }
