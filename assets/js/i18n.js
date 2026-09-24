@@ -66,7 +66,7 @@ const translations = {
         localSave: 'Guardado local',
         recommendedShortcut: 'Atajo recomendado',
         active: 'Activo',
-        navbar: 'Navbar',
+        navbar: 'Barra superior',
         gridView: 'Visión cuadrícula',
         overlayChannels: 'Overlay canales',
         overlayButtons: 'Botones en overlay',
@@ -235,7 +235,7 @@ const translations = {
         localSave: 'Local save',
         recommendedShortcut: 'Recommended shortcut',
         active: 'Active',
-        navbar: 'Navbar',
+        navbar: 'Top bar',
         gridView: 'Grid view',
         overlayChannels: 'Channel overlay',
         overlayButtons: 'Overlay buttons',
@@ -535,6 +535,13 @@ export function translatePage() {
     setAttr('#navbar .btn-indigo.rounded-start-pill', 'aria-label', t('openChannelsSidebar'));
     setAttr('#navbar .btn-outline-indigo.rounded-end-pill', 'aria-label', t('openChannelsCatalog'));
     setHtml('#navbar-toggler .dropdown-item', `<i class="bi bi-gear"></i> ${t('settings')}`);
+    // Botones de filtro y orden de los selectores de canales (modal, panel lateral,
+    // cambiar canal y visión única): las claves existían pero nunca se aplicaban.
+    setHtml(
+        'button[data-bs-target$="collapse-btn-group"]',
+        `<i class="bi bi-funnel"></i> ${t('filterByCountry')}`,
+    );
+    setHtml('button[data-i18n-sort]', `<i class="bi bi-sort-down"></i> ${t('sort')}`);
     setAttr('#navbar .btn.btn-sm.btn-outline-secondary.d-lg-none', 'title', t('settings'));
     setAttr(
         '#navbar .btn.btn-sm.btn-outline-secondary.d-lg-none',
@@ -675,22 +682,22 @@ export function translatePage() {
         `<i class="bi bi-floppy"></i> ${t('savingChannels')}`,
     );
 
-    document.querySelectorAll('#overlay-boton-selecionar-señal').forEach((element) => {
+    document.querySelectorAll('.overlay-boton-selecionar-señal').forEach((element) => {
         element.setAttribute('title', t('selectDifferentSignal'));
         element.innerHTML = `<span>${t('selectSignal')}</span><i class="bi bi-collection" data-bs-toggle="tooltip" data-bs-title="${t('selectDifferentSignal')}"></i>`;
     });
-    document.querySelectorAll('#overlay-boton-mover').forEach((element) => {
+    document.querySelectorAll('.overlay-boton-mover').forEach((element) => {
         element.setAttribute('aria-label', t('moveChannel'));
         element.setAttribute('title', t('moveChannel'));
         element.setAttribute('data-bs-title', t('moveChannel'));
         element.innerHTML = `<span>${t('move')}</span><i class="bi bi-arrows-move"></i>`;
     });
-    document.querySelectorAll('#overlay-boton-cambiar').forEach((element) => {
+    document.querySelectorAll('.overlay-boton-cambiar').forEach((element) => {
         element.setAttribute('title', t('changeChannel'));
         element.setAttribute('data-bs-title', t('changeChannel'));
         element.innerHTML = `<span>${t('change')}</span><i class="bi bi-arrow-repeat"></i>`;
     });
-    document.querySelectorAll('#overlay-boton-pagina-oficial').forEach((element) => {
+    document.querySelectorAll('.overlay-boton-pagina-oficial').forEach((element) => {
         element.setAttribute('title', t('officialPage'));
         element.setAttribute('data-bs-title', t('officialPage'));
         // El nombre del canal lo pone channelUI y no se traduce; solo se recompone
@@ -698,7 +705,7 @@ export function translatePage() {
         const nombreCanal = element.querySelector('span')?.textContent.trim();
         if (nombreCanal) element.setAttribute('aria-label', `${nombreCanal}: ${t('officialPage')}`);
     });
-    document.querySelectorAll('#overlay-boton-quitar').forEach((element) => {
+    document.querySelectorAll('.overlay-boton-quitar').forEach((element) => {
         element.setAttribute('aria-label', t('removeChannel'));
         element.setAttribute('title', t('removeChannel'));
         element.setAttribute('data-bs-title', t('removeChannel'));

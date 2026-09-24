@@ -13,6 +13,7 @@ import {
     safeHttpUrl,
 } from './helpers/index.js';
 import { acquirePlayerSlotHandle } from './helpers/helperPlayerSlots.js';
+import { isBenignPlayRejection } from './helpers/helperPlayRejection.js';
 import { buildErrorToastMessage, t } from './i18n.js';
 
 // Funciones de UI de canales extraídas de main.js
@@ -286,8 +287,11 @@ export function createVideoPlayer(canalId, urlCarga) {
         });
 
         player.ready(() => {
-            player.play().catch(() => {
+            player.play().catch((/** @type {unknown} */ error) => {
                 slot.release();
+                // Un play() interrumpido o sin permiso de autoplay no es un stream caído:
+                // antes se desechaba el player y el canal quedaba como "no disponible".
+                if (isBenignPlayRejection(error)) return;
                 fallbackToYoutubeOrShowError();
             });
         });
@@ -381,7 +385,7 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         );
 
         const BOTON_SELECCIONAR_SEÑAL_CANAL = document.createElement('button');
-        BOTON_SELECCIONAR_SEÑAL_CANAL.id = 'overlay-boton-selecionar-señal';
+        BOTON_SELECCIONAR_SEÑAL_CANAL.classList.add('overlay-boton-selecionar-señal');
         BOTON_SELECCIONAR_SEÑAL_CANAL.setAttribute('type', 'button');
         BOTON_SELECCIONAR_SEÑAL_CANAL.setAttribute('aria-label', t('selectDifferentSignal'));
         BOTON_SELECCIONAR_SEÑAL_CANAL.setAttribute('title', t('selectDifferentSignal'));
@@ -463,7 +467,7 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         }
 
         const MOVE_CHANNEL_BUTTON = document.createElement('button');
-        MOVE_CHANNEL_BUTTON.id = 'overlay-boton-mover';
+        MOVE_CHANNEL_BUTTON.classList.add('overlay-boton-mover');
         MOVE_CHANNEL_BUTTON.setAttribute('type', 'button');
         MOVE_CHANNEL_BUTTON.setAttribute('aria-label', t('moveChannel'));
         MOVE_CHANNEL_BUTTON.setAttribute('title', t('moveChannel'));
@@ -488,7 +492,7 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         enableKeyboardReorder(MOVE_CHANNEL_BUTTON);
 
         const CHANGE_CHANNEL_BUTTON = document.createElement('button');
-        CHANGE_CHANNEL_BUTTON.id = 'overlay-boton-cambiar';
+        CHANGE_CHANNEL_BUTTON.classList.add('overlay-boton-cambiar');
         CHANGE_CHANNEL_BUTTON.setAttribute('type', 'button');
         CHANGE_CHANNEL_BUTTON.setAttribute('aria-label', t('changeChannel'));
         CHANGE_CHANNEL_BUTTON.setAttribute('title', t('changeChannel'));
@@ -515,7 +519,7 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         });
 
         const OFFICIAL_CHANNEL_LINK = document.createElement('a');
-        OFFICIAL_CHANNEL_LINK.id = 'overlay-boton-pagina-oficial';
+        OFFICIAL_CHANNEL_LINK.classList.add('overlay-boton-pagina-oficial');
         OFFICIAL_CHANNEL_LINK.title = t('officialPage');
         if (tipoSeñalCargada === 'yt_id')
             website = `https://www.youtube.com/channel/${signals.yt_id}`;
@@ -556,7 +560,7 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         );
 
         const REMOVE_CHANNEL_BUTTON = document.createElement('button');
-        REMOVE_CHANNEL_BUTTON.id = 'overlay-boton-quitar';
+        REMOVE_CHANNEL_BUTTON.classList.add('overlay-boton-quitar');
         REMOVE_CHANNEL_BUTTON.setAttribute('aria-label', t('removeChannel'));
         REMOVE_CHANNEL_BUTTON.setAttribute('type', 'button');
         REMOVE_CHANNEL_BUTTON.setAttribute('title', t('removeChannel'));

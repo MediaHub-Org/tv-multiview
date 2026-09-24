@@ -46,6 +46,7 @@ import {
     parseStateFromUrl,
     readStoredObject,
     fixPwaInstallScreenshotAlt,
+    fitGridToViewport,
 } from './helpers/index.js';
 import {
     buildErrorToastMessage,
@@ -138,7 +139,10 @@ export const LABEL_MODAL_CAMBIAR_CANAL = document.querySelector('#label-para-nam
 
 // MARK: LocalStorage
 let lsModal = localStorage.getItem('modal-status') ?? 'show';
-let lsNavbar = localStorage.getItem('navbar-display');
+// Clave nueva a propósito: la antigua ('navbar-display') se guardaba como 'show' en
+// cada carga, así que no distingue una elección del usuario del valor por defecto.
+// La barra superior pasa a estar oculta por defecto (todo vive en la barra inferior).
+let lsNavbar = localStorage.getItem('top-bar-display');
 let lsEstiloVision = localStorage.getItem('diseño-seleccionado');
 
 let lsPosicionBotonesFlotantes = localStorage.getItem('posicion-botones-flotante');
@@ -162,7 +166,7 @@ CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR.addEventListener('click', () => {
     setCheckboxState(
         CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR,
         SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR,
-        'navbar-display',
+        'top-bar-display',
         CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR.checked,
     );
 });
@@ -538,6 +542,13 @@ new Sortable(CONTAINER_INTERNO_VISION_UNICA, {
 // ocultar texto si el tamaño de los botones excede el tamaño del contenedor
 window.addEventListener('resize', hideTextoBotonesOverlay);
 
+// Reencaja la cuadrícula cuando cambia el alto disponible: resize de ventana, pero
+// también mostrar/ocultar la barra superior o la alerta de conexión.
+const APP_SHELL = document.querySelector('main.app-shell');
+if (APP_SHELL && 'ResizeObserver' in window) {
+    new ResizeObserver(() => fitGridToViewport()).observe(APP_SHELL);
+}
+
 // MARK: auto-ocultar barras de overlay tras inactividad
 // Mientras el usuario no mueve el puntero ni usa el teclado, las barras de canal
 // se atenúan (ver .barra-overlay-idle en style.css) para no tapar la señal;
@@ -598,19 +609,19 @@ window.addEventListener('DOMContentLoaded', () => {
     // Modal welcome disabled - no longer showing
 
     // Navbar
-    lsNavbar !== 'hide'
+    lsNavbar === 'show'
         ? (MAIN_NAVBAR.classList.remove('d-none'),
           setCheckboxState(
               CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR,
               SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR,
-              'navbar-display',
+              'top-bar-display',
               true,
           ))
         : (MAIN_NAVBAR.classList.add('d-none'),
           setCheckboxState(
               CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR,
               SPAN_VALOR_CHECKBOX_PERSONALIZAR_VISUALIZACION_NAVBAR,
-              'navbar-display',
+              'top-bar-display',
               false,
           ));
 

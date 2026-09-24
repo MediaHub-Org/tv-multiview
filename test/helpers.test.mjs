@@ -9,6 +9,8 @@ import { areSimilarNames } from '../assets/js/helpers/helperSimilarNames.js';
 import { M3U_A_JSON } from '../assets/js/helpers/helperM3U.js';
 import { readStoredObject } from '../assets/js/helpers/helperStorage.js';
 import { escapeHtml, safeHttpUrl } from '../assets/js/helpers/helperEscape.js';
+import { computeGridFit } from '../assets/js/helpers/helperFitGrid.js';
+import { isBenignPlayRejection } from '../assets/js/helpers/helperPlayRejection.js';
 
 // Minimal localStorage stub (Node has no DOM). Only getItem is exercised.
 const store = {};
@@ -108,4 +110,46 @@ test('safeHttpUrl: keeps http(s) links, drops other schemes and junk', () => {
     assert.equal(safeHttpUrl('not a url'), '');
     assert.equal(safeHttpUrl(''), '');
     assert.equal(safeHttpUrl(null), '');
+});
+
+test('computeGridFit: 16:9 grid shrinks to fit every row on screen', () => {
+    // 9 channels, 3 per row, 1366x768: rows are height-bound (256px), 16:9 tiles.
+    const fit = computeGridFit({ count: 9, cols: 3, width: 1366, height: 768, keepAspect: true });
+    assert.equal(fit.rows, 3);
+    assert.ok(fit.tileHeight * fit.rows <= 768);
+    assert.ok(Math.abs(fit.tileWidth / fit.tileHeight - 16 / 9) < 1e-9);
+    assert.ok(fit.gridWidth <= 1366);
+});
+
+test('computeGridFit: 12 channels in 3 columns no longer overflow the height', () => {
+    const fit = computeGridFit({ count: 12, cols: 3, width: 1366, height: 768, keepAspect: true });
+    assert.equal(fit.rows, 4);
+    assert.ok(fit.tileHeight * 4 <= 768 + 1e-9);
+    assert.ok(fit.gridWidth < 1366); // narrower, centred grid
+});
+
+test('computeGridFit: fill mode splits the height evenly and keeps full width', () => {
+    const fit = computeGridFit({ count: 4, cols: 2, width: 1000, height: 600, keepAspect: false });
+    assert.deepEqual(fit, { rows: 2, tileWidth: 500, tileHeight: 300, gridWidth: 1000 });
+});
+
+test('computeGridFit: width-bound layouts keep 16:9 without exceeding the width', () => {
+    const fit = computeGridFit({ count: 2, cols: 2, width: 800, height: 900, keepAspect: true });
+    assert.equal(fit.rows, 1);
+    assert.equal(fit.tileWidth, 400);
+    assert.equal(fit.tileHeight, 225);
+});
+
+test('computeGridFit: guards against zero channels or columns', () => {
+    const fit = computeGridFit({ count: 0, cols: 0, width: 800, height: 600, keepAspect: true });
+    assert.equal(fit.rows, 1);
+    assert.ok(Number.isFinite(fit.tileHeight));
+});
+
+test('isBenignPlayRejection: interrupted or autoplay-blocked play() is not a dead stream', () => {
+    assert.equal(isBenignPlayRejection(new DOMException('interrupted', 'AbortError')), true);
+    assert.equal(isBenignPlayRejection(new DOMException('blocked', 'NotAllowedError')), true);
+    assert.equal(isBenignPlayRejection(new DOMException('bad src', 'NotSupportedError')), false);
+    assert.equal(isBenignPlayRejection(new Error('boom')), false);
+    assert.equal(isBenignPlayRejection(undefined), false);
 });
