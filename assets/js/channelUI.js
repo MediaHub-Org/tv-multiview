@@ -9,6 +9,8 @@ import {
     activarTooltipsBootstrap,
     readStoredObject,
     enableKeyboardReorder,
+    escapeHtml,
+    safeHttpUrl,
 } from './helpers/index.js';
 import { acquirePlayerSlotHandle } from './helpers/helperPlayerSlots.js';
 import { buildErrorToastMessage, t } from './i18n.js';
@@ -520,7 +522,8 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         if (tipoSeñalCargada === 'twitch_id')
             website = `https://www.twitch.tv/${signals.twitch_id}`;
         OFFICIAL_CHANNEL_LINK.href =
-            website !== '' ? website : `https://www.qwant.com/?q=${name}+en+vivo`;
+            safeHttpUrl(website) ||
+            `https://www.qwant.com/?q=${encodeURIComponent(`${name} en vivo`)}`;
         // El nombre del canal es el texto visible del enlace, pero se oculta cuando
         // los botones no caben (hideTextoBotonesOverlay): sin aria-label el enlace se
         // queda sin nombre accesible justo en las rejillas más apretadas.
@@ -530,7 +533,7 @@ export function createChannelOverlay(canalId, tipoSeñalCargada, valorIndex = 0)
         OFFICIAL_CHANNEL_LINK.setAttribute('data-bs-title', t('officialPage'));
         OFFICIAL_CHANNEL_LINK.rel = 'noopener nofollow noreferrer';
         OFFICIAL_CHANNEL_LINK.innerHTML = `<span>
-                ${name}
+                ${escapeHtml(name)}
                 ${
                     country && typeof country === 'string' && COUNTRY_CODES[country]
                         ? ` <img src="https://flagcdn.com/${country.toLowerCase()}.svg" alt="bandera ${COUNTRY_CODES[country]}" title="${COUNTRY_CODES[country]}" class="svg-bandera">`
