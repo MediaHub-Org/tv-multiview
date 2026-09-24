@@ -305,23 +305,6 @@
     "category": "news",
     "country": "cn"
   },
-  "cgtnrussian": {
-    "name": "CGTN Russian",
-    "logo": "https://i.imgur.com/nDWkCmL.png",
-    "signals": {
-      "iframe_url": [],
-      "m3u8_url": [
-        "https://russian-livews.cgtn.com/hls/LSvexABhNipibK5KRuUkvHZ7220802LSTeze9o8tdFXMHsb1VosgoT220802cd/playlist.m3u8"
-      ],
-      "yt_id": "",
-      "yt_embed": "",
-      "yt_playlist": "",
-      "twitch_id": ""
-    },
-    "website": "",
-    "category": "news",
-    "country": "cn"
-  },
   "cgtnspanish": {
     "name": "CGTN Spanish SD",
     "logo": "https://i.imgur.com/Poz3xfi.png",
@@ -423,23 +406,6 @@
     "website": "",
     "category": "kids",
     "country": "de"
-  },
-  "globaltv": {
-    "name": "Global TV SD",
-    "logo": "https://i.imgur.com/1rQaROm.png",
-    "signals": {
-      "iframe_url": [],
-      "m3u8_url": [
-        "https://stmv4.voxtvhd.com.br/globaltv/globaltv/playlist.m3u8"
-      ],
-      "yt_id": "",
-      "yt_embed": "",
-      "yt_playlist": "",
-      "twitch_id": ""
-    },
-    "website": "",
-    "category": "general",
-    "country": "do"
   },
   "24horas": {
     "name": "24 Horas",
@@ -1100,23 +1066,6 @@
     },
     "website": "",
     "category": "entertainment",
-    "country": "mx"
-  },
-  "lasestrellas": {
-    "name": "Las Estrellas",
-    "logo": "https://i.imgur.com/g5ShxZ7.png",
-    "signals": {
-      "iframe_url": [],
-      "m3u8_url": [
-        "https://channel01-onlymex.akamaized.net/hls/live/2022749/event01/index.m3u8"
-      ],
-      "yt_id": "",
-      "yt_embed": "",
-      "yt_playlist": "",
-      "twitch_id": ""
-    },
-    "website": "",
-    "category": "general",
     "country": "mx"
   },
   "nh": {
