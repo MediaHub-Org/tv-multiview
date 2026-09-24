@@ -595,11 +595,11 @@ export function translatePage() {
     }
     setHtml(
         '#modal-bienvenida li:nth-child(10)',
-        `${t('disclaimerContactIntro')} <a href="https://github.com/interneto/json-tv-multiview/issues" rel="nofollow noreferrer">${t('contactMe')} <i class="bi bi-box-arrow-up-right"></i></a>.`,
+        `${t('disclaimerContactIntro')} <a href="https://github.com/MediaHub-Org/tv-multiview/issues" rel="nofollow noreferrer">${t('contactMe')} <i class="bi bi-box-arrow-up-right"></i></a>.`,
     );
     setHtml(
         '#modal-bienvenida .modal-body > p',
-        `- ${t('disclaimerSourceIntro')} <a href="https://github.com/interneto/tv-multiview" rel="nofollow noreferrer"><i class="bi bi-github"></i> ${t('repository')} <i class="bi bi-box-arrow-up-right"></i></a>.`,
+        `- ${t('disclaimerSourceIntro')} <a href="https://github.com/MediaHub-Org/tv-multiview" rel="nofollow noreferrer"><i class="bi bi-github"></i> ${t('repository')} <i class="bi bi-box-arrow-up-right"></i></a>.`,
     );
     setHtml(
         '#boton-entendido',

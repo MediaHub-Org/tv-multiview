@@ -1,4 +1,4 @@
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.3.0/workbox-sw.js');
 
 const HTML_CACHE = "html";
 const JS_CACHE = "javascript";
@@ -37,7 +37,8 @@ workbox.routing.registerRoute(
       ],
     });
     try {
-      return await strategy.handle({event});
+      // Workbox 6+ reads the request from the options, not from the event.
+      return await strategy.handle({event, request: event.request});
     } catch (err) {
       // If Workbox fails unexpectedly, fallback to direct fetch to avoid blocking the request
       try {
