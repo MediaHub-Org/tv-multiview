@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- Fixed
+    - The deeper stream check retired region-locked channels: RTVE (La 1, Clan, Teledeporte) serve their playlist with CORS but answer 403 to the video segments from GitHub's US runner. A segment 403 behind a CORS-approved playlist is now reported as a probable region lock and the channel is kept. A segment 404 is retried once, since live playlists rotate their segment window.
+
+- Added
+    - A test that every channel in the default grid is still in `tv-channels.json`, so a maintenance PR that retires one fails CI instead of leaving new visitors with an empty tile.
+
 ## [v0.25]
 
 - Fixed

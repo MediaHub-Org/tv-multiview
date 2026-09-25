@@ -94,12 +94,45 @@ function fetchWithOrigin(url, timeout, readBody, redirects = 0) {
     });
 }
 
+const corsAllowed = (acao) => acao === '*' || acao === SITE_ORIGIN;
+
+/**
+ * Recorre la cadena y ajusta dos falsos negativos habituales desde el runner:
+ * - Segmento 403 con CORS correcto: el servidor sirve la playlist pero no el vídeo a
+ *   la IP del runner (EE. UU.). Es bloqueo por país (p. ej. RTVE), no un canal caído:
+ *   se da por bueno y se marca `geo`.
+ * - Segmento 404: en un directo la ventana de segmentos rota y la playlist cacheada
+ *   puede apuntar a uno ya expirado. Se reintenta una vez con la playlist recién pedida.
+ *
+ * @returns {Promise<{ok: boolean, status: number|null, acao: string|undefined, step: string, geo?: boolean}>}
+ */
+async function probeStream(url, timeout) {
+    let result = await walkStream(url, timeout);
+    if (!result.ok && result.step === 'segmento' && result.status === 404) {
+        result = await walkStream(url, timeout);
+    }
+    if (
+        !result.ok &&
+        result.step === 'segmento' &&
+        result.status === 403 &&
+        corsAllowed(result.acao)
+    ) {
+        return {
+            ...result,
+            ok: true,
+            geo: true,
+            step: 'segmento (403: probable bloqueo por país)',
+        };
+    }
+    return result;
+}
+
 /**
  * Recorre playlist → variante → segmento como lo haría el player.
  *
  * @returns {Promise<{ok: boolean, status: number|null, acao: string|undefined, step: string}>}
  */
-async function probeStream(url, timeout) {
+async function walkStream(url, timeout) {
     let current = await fetchWithOrigin(url, timeout, !SHALLOW);
     if (!current.ok || SHALLOW) return { ...current, step: 'playlist' };
 
@@ -119,14 +152,16 @@ async function main() {
     const channels = JSON.parse(fs.readFileSync(CHANNELS_FILE, 'utf8'));
     const results = {};
     const sinCors = [];
+    const geoBloqueados = [];
 
     for (const [id, data] of Object.entries(channels)) {
         if (ONLY && !ONLY.has(id)) continue;
         const url = data?.signals?.m3u8_url?.[0];
         if (!url) continue;
 
-        const { ok, status, acao, step } = await probeStream(url, TIMEOUT);
+        const { ok, status, acao, step, geo } = await probeStream(url, TIMEOUT);
         results[id] = ok;
+        if (geo) geoBloqueados.push(id);
         if (!ok) sinCors.push({ id, status, acao: acao ?? '(ninguna)', step });
         console.log(
             `${ok ? '✓' : '✗'} ${id} [${step}] status=${status ?? 'sin respuesta'} acao=${acao ?? '-'}`,
@@ -138,6 +173,11 @@ async function main() {
     console.log(
         `\nUtilizables desde el navegador: ${Object.values(results).filter(Boolean).length}`,
     );
+    if (geoBloqueados.length) {
+        console.log(
+            `Se mantienen (vídeo 403 desde el runner, probable bloqueo por país): ${geoBloqueados.join(', ')}`,
+        );
+    }
     console.log(`Bloqueados por CORS o sin respuesta: ${sinCors.length}`);
     for (const { id, status, acao, step } of sinCors) {
         console.log(`  - ${id} (${step}: status ${status ?? 'sin respuesta'}, acao ${acao})`);

@@ -37,6 +37,7 @@ test('firstPlaylistUri: rejects non-HLS bodies and empty playlists', () => {
 // /deadseg/* 404s the segment; /redirect bounces to /ok/master.m3u8.
 let server;
 let base;
+let flakyHits = 0;
 before(async () => {
     server = http.createServer((req, res) => {
         const cors = { 'access-control-allow-origin': '*' };
@@ -51,6 +52,9 @@ before(async () => {
             res.writeHead(200, cors).end('#EXTM3U\n#EXTINF:6,\nseg1.ts\n');
         } else if (file === 'seg1.ts') {
             if (scenario === 'deadseg') res.writeHead(404, cors).end();
+            else if (scenario === 'geo') res.writeHead(403, cors).end();
+            else if (scenario === 'geonocors') res.writeHead(403).end();
+            else if (scenario === 'flaky' && flakyHits++ === 0) res.writeHead(404, cors).end();
             else if (scenario === 'nosegcors') res.writeHead(200).end('ts');
             else res.writeHead(200, cors).end('ts');
         } else {
@@ -83,6 +87,22 @@ test('probeStream: dead segment fails', async () => {
     const r = await probeStream(`${base}/deadseg/master.m3u8`, 3000);
     assert.equal(r.ok, false);
     assert.equal(r.status, 404);
+});
+
+test('probeStream: segment 403 behind a CORS-approved playlist is kept as region-locked', async () => {
+    const r = await probeStream(`${base}/geo/master.m3u8`, 3000);
+    assert.equal(r.ok, true);
+    assert.equal(r.geo, true);
+});
+
+test('probeStream: segment 403 without CORS is still a failure', async () => {
+    const r = await probeStream(`${base}/geonocors/master.m3u8`, 3000);
+    assert.equal(r.ok, false);
+});
+
+test('probeStream: a segment 404 is retried once (rotating live window)', async () => {
+    const r = await probeStream(`${base}/flaky/master.m3u8`, 3000);
+    assert.equal(r.ok, true);
 });
 
 test('probeStream: sends the published site origin', () => {
