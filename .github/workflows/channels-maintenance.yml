@@ -1,14 +1,12 @@
 name: Channel maintenance
 
-# Link rot is continuous, but the cleanup used to be manual — which is how the list
-# drifted far enough to need a 77-channel prune in a single pass. This runs the whole
-# maintenance chain weekly and opens a PR with the diff, so the list is reviewed in
-# small increments instead of occasional big batches.
+# Runs the whole maintenance chain (health check -> CORS/segment check -> YouTube
+# fallbacks -> https upgrade -> prune) and pushes the diff to a branch for review.
+# Manual only (Actions -> Channel maintenance -> Run workflow): run it every few
+# weeks. It opens a PR when the org allows Actions to create PRs; otherwise the run
+# summary lists the retired channels and links a ready-made "Compare & pull request".
 
 on:
-    schedule:
-        # Mondays at 05:00 UTC.
-        - cron: '0 5 * * 1'
     workflow_dispatch:
 
 permissions:
@@ -53,33 +51,53 @@ jobs:
             - name: Validate JSON
               run: node tools/validate_json_light.js
 
-            - name: Open pull request with the diff
+            - name: Push the diff and open a pull request
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   if git diff --quiet -- json-tv/; then
-                    echo "No channel changes this week."
+                    echo "No channel changes." | tee -a "$GITHUB_STEP_SUMMARY"
                     exit 0
                   fi
+
+                  # Channels this run retires, for the summary / PR body.
+                  RETIRED=$(node -e '
+                    const { execSync } = require("child_process");
+                    const before = JSON.parse(execSync("git show HEAD:json-tv/tv-channels.json"));
+                    const after = require("./json-tv/tv-channels.json");
+                    const gone = Object.keys(before).filter((id) => !(id in after));
+                    console.log(gone.map((id) => `- ${id} (${before[id].name})`).join("\n") || "- none");
+                  ')
+                  ACTIVE=$(node -p "Object.keys(require('./json-tv/tv-channels.json')).length")
 
                   BRANCH="chore/channel-maintenance-$(date -u +%Y-%m-%d)"
                   git config user.name "github-actions[bot]"
                   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
                   git checkout -b "$BRANCH"
                   git add json-tv/
-                  git commit -m "chore: weekly channel maintenance ($(date -u +%Y-%m-%d))"
-                  git push --force-with-lease origin "$BRANCH"
+                  git commit -m "chore: channel maintenance ($(date -u +%Y-%m-%d))"
+                  git push --force origin "$BRANCH"
 
-                  ACTIVE=$(node -p "Object.keys(require('./json-tv/tv-channels.json')).length")
-                  INACTIVE=$(node -p "Object.keys(require('./json-tv/inactive.json')).length")
+                  BODY="Automated channel maintenance. Active channels after this run: $ACTIVE.
 
-                  gh pr create \
-                    --title "chore: weekly channel maintenance" \
-                    --body "Automated run of the maintenance chain (health check → YouTube fallbacks → https upgrade → prune).
+                  Retired to inactive.json:
+                  $RETIRED
 
-                  Active channels: $ACTIVE
-                  Inactive channels: $INACTIVE
+                  Review before merging: a channel can fail from the runner's (US) network and still work for viewers."
 
-                  Review the diff before merging: a channel can fail the check from the runner's network and still work for users." \
-                    --head "$BRANCH" \
-                    --base main
+                  COMPARE="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/main...$BRANCH?expand=1"
+                  {
+                    echo "## Channel maintenance"
+                    echo
+                    echo "$BODY"
+                    echo
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+                  if gh pr create --title "chore: channel maintenance ($(date -u +%Y-%m-%d))" \
+                      --body "$BODY" --head "$BRANCH" --base main; then
+                    echo "Pull request opened." >> "$GITHUB_STEP_SUMMARY"
+                  else
+                    # The org does not let Actions create PRs: leave a one-click link instead of failing.
+                    echo "::notice::Actions may not open PRs here. Open it from: $COMPARE"
+                    echo "**[Open the pull request]($COMPARE)** (Actions may not create PRs in this org)." >> "$GITHUB_STEP_SUMMARY"
+                  fi
